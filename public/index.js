@@ -1,6 +1,6 @@
 async function main() {
     const response = await fetch(
-        "https://api.twelvedata.com/time_series?symbol=GME,MSFT,DIS,BNTX&interval=1min&apikey=d122c2f6f4df42f3a091ccdd49cca3bd"
+        "https://api.twelvedata.com/time_series?symbol=GME,MSFT,DIS,BNTX&interval=1day&apikey=d122c2f6f4df42f3a091ccdd49cca3bd"
     );
 
     const result = await response.json();
@@ -15,30 +15,38 @@ async function main() {
     let BNTX = result.BNTX
 
     const stocks = [GME, MSFT, DIS, BNTX];
+
+    stocks.forEach(stock => stock.values.reverse())
+
+    // Time Chart
     new Chart(timeChartCanvas.getContext('2d'), {
         type: 'line',
         data: {
-            labels: stocks[0].values.map(value => value.datetime),
+            labels: stocks[0].values.reverse().map(value => value.datetime),
             datasets: stocks.map(stock => ({
                 label: stock.meta.symbol,
-                data: stock.values.map(value => parseFloat(value.high)),
+                data: stock.values.reverse().map(value => parseFloat(value.high)),
                 backgroundColor: getColor(stock.meta.symbol),
                 borderColor: getColor(stock.meta.symbol),
             }))
         }
     });
+    //bar graph
     new Chart(highestPriceChartCanvas.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: stocks[0].values.map(value => value.stocks),
-            datasets: stocks.map(stock => ({
-                label: stock.values.map(value => parseFloat(value.high)),
-                data: stock.values.map(value => parseFloat(value.high)),
+            labels: stocks,
+            datasets: stocks.filter(stock => ({
+                label: stocks[0].values.reverse().filter(value => value.highest),
+                data: stock.values.reverse().filter(value => parseFloat(value.high)),
                 backgroundColor: getColor(stock.meta.symbol),
                 borderColor: getColor(stock.meta.symbol),
-            }))
-        }
+            })),
+            borderWidth: 1
+        },
     });
+
+
     function getColor(stock) {
         if (stock === "GME") {
             return 'rgba(61, 161, 61, 0.7)'
