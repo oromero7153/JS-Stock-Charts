@@ -35,15 +35,20 @@ async function main() {
     new Chart(highestPriceChartCanvas.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: stocks,
-            datasets: stocks.filter(stock => ({
-                label: stocks[0].values.reverse().filter(value => value.highest),
-                data: stock.values.reverse().filter(value => parseFloat(value.high)),
-                backgroundColor: getColor(stock.meta.symbol),
-                borderColor: getColor(stock.meta.symbol),
-            })),
-            borderWidth: 1
-        },
+            labels: stocks.map(stock => stock.meta.symbol),
+            datasets: [{
+                label: 'Highest',
+                backgroundColor: stocks.map(stock => (
+                    getColor(stock.meta.symbol)
+                )),
+                borderColor: stocks.map(stock => (
+                    getColor(stock.meta.symbol)
+                )),
+                data: stocks.map(stock => (
+                    findHighest(stock.values)
+                ))
+            }]
+        }
     });
 
 
@@ -62,5 +67,13 @@ async function main() {
         }
     }
 }
-
+function findHighest(values) {
+    let highest = 0;
+    values.forEach(value => {
+        if (parseFloat(value.high) > highest) {
+            highest = value.high
+        }
+    })
+    return highest
+}
 main()
